@@ -1,0 +1,38 @@
+name: Daily Fetch
+
+on:
+  schedule:
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+
+jobs:
+  fetch_whl:
+    runs-on: ubuntu-latest
+    env:
+      MS_USERNAME: ${{ secrets.MS_USERNAME }}
+      MS_PASSWD: ${{ secrets.MS_PASSWD }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.7
+    - name: Clone openi repo
+      run: |
+        pip install requests
+        git clone https://huggingface.co/lvyufeng/mindspore-daily.git
+        cd mindspore-daily
+        git config --global user.email "lvyufeng@cqu.edu.cn"
+        git config --global user.name "lvyufeng"
+        git rm -rf *.whl
+        cd ..
+    - name: Download whl
+      run: |
+        python download_whl.py --path=./mindspore-daily/
+    - name: update whl
+      run: |
+        cd mindspore-daily
+        git lfs install
+        git lfs track *.whl
+        git add . && git commit --amend --no-edit
+        git push https://${{ secrets.HF_USERNAME }}:${{ secrets.HF_PASSWD }}@huggingface.co/lvyufeng/mindspore-daily.git -f
