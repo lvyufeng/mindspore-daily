@@ -3,7 +3,7 @@ import requests
 import os
 import argparse
 
-candidate_list = ['unified/x86_64/', 'cpu/x86_64/']
+candidate_list = ['unified/x86_64/', 'cpu/x86_64/', 'cpu/aarch64/']
 
 def gen_url(user, passwd, path):
     url_prefix = f'http://{user}:{passwd}@repo.mindspore.cn/mindspore/mindspore/newest/'
