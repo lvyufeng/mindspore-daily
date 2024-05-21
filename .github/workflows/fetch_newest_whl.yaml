@@ -20,7 +20,7 @@ jobs:
     - name: Clone openi repo
       run: |
         pip install requests
-        git clone https://huggingface.co/lvyufeng/mindspore-daily.git
+        GIT_CLONE_PROTECTION_ACTIVE=false git clone https://huggingface.co/lvyufeng/mindspore-daily.git
         cd mindspore-daily
         git config --global user.email "lvyufeng@cqu.edu.cn"
         git config --global user.name "lvyufeng"
