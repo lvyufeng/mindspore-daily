@@ -1,6 +1,6 @@
 import re
 import requests
-import os
+import time
 import argparse
 from datetime import datetime
 
@@ -20,7 +20,8 @@ def gen_url(path):
 
     url_prefix = url_prefix + f'/{master_links[-1]}'
     print(url_prefix)
-
+    
+    retry_count = {}
     for url_suffix in candidate_list:
         url = url_prefix + url_suffix
         response = requests.get(url)
@@ -32,6 +33,11 @@ def gen_url(path):
 
         while matches:
             match = matches.pop(0)
+            if match not in retry_count:
+                retry_count[match] = 0
+            
+            if retry_count[match] > max_try_time:
+                raise ValueError('max retry time.')
             whl_name = 'mindspore-' + match + '.whl'
             idx = match.index('cp')
             save_name = 'mindspore-newest-' + match[idx:] + '.whl'
@@ -52,6 +58,8 @@ def gen_url(path):
             except:
                 print('Resume', match)
                 matches.append(match)
+                retry_count[match] += 1
+                time.sleep(5) # sleep for next retry
 
 
 
