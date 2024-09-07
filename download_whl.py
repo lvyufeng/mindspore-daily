@@ -2,12 +2,24 @@ import re
 import requests
 import os
 import argparse
+from datetime import datetime
 
 candidate_list = ['unified/x86_64/', 'cpu/x86_64/', 'cpu/aarch64/']
 
-def gen_url(user, passwd, path):
-    url_prefix = f'http://{user}:{passwd}@repo.mindspore.cn/mindspore/mindspore/newest/'
+def gen_url(path):
+    current_year_month = datetime.now().strftime("%Y%m")
+    current_year_month_day = datetime.now().strftime("%Y%m%d")
+    url_prefix = f'http://repo.mindspore.cn/mindspore/mindspore/version/{current_year_month}/{current_year_month_day}'
     
+    content = requests.get(url_prefix)
+    master_links = re.findall(r'href=["\'](.*?master.*?)["\']', content.text)
+
+    if not master_links:
+        raise ValueError('Today not found master whl package.')
+
+    url_prefix = url_prefix + f'/{master_links[-1]}'
+    print(url_prefix)
+
     for url_suffix in candidate_list:
         url = url_prefix + url_suffix
         response = requests.get(url)
@@ -23,7 +35,6 @@ def gen_url(user, passwd, path):
             save_name = 'mindspore-newest-' + match[idx:] + '.whl'
 
             whl_url = url + whl_name
-
             # # 使用 stream=True 发送 GET 请求
             response = requests.get(whl_url, stream=True)
 
@@ -43,6 +54,4 @@ if __name__ == '__main__':
     parser.add_argument('--path', type=str)
     args = parser.parse_args()
 
-    username = os.environ['MS_USERNAME']
-    passwd = os.environ['MS_PASSWD']
-    gen_url(username, passwd, args.path)
+    gen_url(args.path)
