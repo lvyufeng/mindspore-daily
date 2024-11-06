@@ -24,7 +24,11 @@ jobs:
         cd mindspore-daily
         git config --global user.email "lvyufeng@cqu.edu.cn"
         git config --global user.name "lvyufeng"
-        git rm -rf *.whl
+        if ls *.whl 1> /dev/null 2>&1; then
+          git rm -rf *.whl
+        else
+          echo "No .whl files found."
+        fi
         cd ..
     - name: Download whl
       run: |

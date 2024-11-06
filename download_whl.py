@@ -13,7 +13,12 @@ def gen_url(path):
     url_prefix = f'http://repo.mindspore.cn/mindspore/mindspore/version/{current_year_month}/{current_year_month_day}'
     
     content = requests.get(url_prefix)
-    master_links = re.findall(r'href=["\'](.*?master.*?)["\']', content.text)
+    all_links = re.findall(r'href=["\'](.*?master.*?)["\']', content.text)
+
+    master_links = []
+    for link in all_links:
+        if '.html' not in link:
+            master_links.append(link)
 
     if not master_links:
         raise ValueError('Today not found master whl package.')
